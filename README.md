@@ -16,7 +16,7 @@ A collaborative program by **Google** and **Kaggle** designed to equip participa
 - [Course Structure](#-course-structure)
 - [Progress Tracker](#-progress-tracker)
   - [✅ Day 1: Introduction to Agents & Agentic Architectures](#-day-1-introduction-to-agents--agentic-architectures-completed)
-  - [⬜ Day 2: Agent Tools & Interoperability with MCP](#-day-2-agent-tools--interoperability-with-mcp-pending)
+  - [✅ Day 2: Agent Tools & Interoperability with MCP](#-day-2-agent-tools--interoperability-with-mcp-completed)
   - [⬜ Day 3: Context Engineering & Memory Management](#-day-3-context-engineering--memory-management-pending)
   - [⬜ Day 4: Agent Quality: Observability, Logging, Tracing & Evaluation](#-day-4-agent-quality-observability-logging-tracing--evaluation-pending)
   - [⬜ Day 5: Prototype to Production](#-day-5-prototype-to-production-pending)
@@ -47,7 +47,7 @@ This intensive 5-day course combines **theoretical insights** with **practical a
 | Day | Topic | Status |
 |-----|-------|--------|
 | **Day 1** | Introduction to Agents & Agentic Architectures | ✅ Completed |
-| **Day 2** | Agent Tools & Interoperability with MCP | ⬜ Pending |
+| **Day 2** | Agent Tools & Interoperability with MCP | ✅ Completed |
 | **Day 3** | Context Engineering & Memory Management | ⬜ Pending |
 | **Day 4** | Agent Quality: Observability, Logging, Tracing & Evaluation | ⬜ Pending |
 | **Day 5** | Prototype to Production | ⬜ Pending |
@@ -107,23 +107,66 @@ This intensive 5-day course combines **theoretical insights** with **practical a
 
 ---
 
-### ⬜ Day 2: Agent Tools & Interoperability with MCP (Pending)
+### ✅ Day 2: Agent Tools & Interoperability with MCP (Completed)
 
 **📁 Folder**: [`day_02/`](./day_02/)
 
-#### Topics to Cover
+#### What I Learned
 
-- Agent Tools fundamentals
-- Model Context Protocol (MCP) for interoperability
-- Building and integrating custom tools
-- Tool selection and optimization strategies
-- Advanced function calling patterns
+**Theoretical Foundations:**
+- 🔧 Why agents need tools to transform from advisors to executors
+- 🌐 Model Context Protocol (MCP) - the "USB for AI agents"
+- 🏗️ MCP Architecture: Client-Server model with Resources, Tools, and Prompts
+- 🔌 Standardization benefits: One protocol for all integrations
+- 💡 Community-driven ecosystem of MCP servers (GitHub, Slack, databases, image generation)
+- ⚖️ Production-ready patterns for tool development
+- ⏳ Long-running operations and human-in-the-loop workflows
 
-#### Assignments
+**Practical Skills:**
+- Built custom function tools following ADK best practices (type hints, docstrings, structured returns)
+- Created a currency converter agent with multiple tools (fee lookup, exchange rates)
+- Used agents as tools - built a calculation agent that generates and executes Python code
+- Connected to external MCP servers (Everything MCP, Image Generation server)
+- Implemented long-running operations with pause-resume patterns
+- Built a shipping coordinator with approval workflows for large orders
+- Mastered tool patterns:
+  - **Function Tools** - Custom business logic
+  - **Agent Tools** - Specialist agent delegation
+  - **MCP Tools** - External service integration
+  - **Long-Running Tools** - Human approval workflows
+- Used `ToolContext` for confirmation requests
+- Managed state with `ResumabilityConfig` and `App`
 
-**📖 Whitepaper**: Agent Tools & MCP
-**🎧 Podcast**: Unit 2 Summary
-**💻 Codelabs**: TBD
+#### Materials Completed
+
+**📖 Whitepaper**: Agent Tools & Interoperability with MCP ✅
+- Comprehensive notes on MCP architecture and benefits
+- Key concepts: Resources, Tools, Prompts, Client-Server model
+
+**💻 Codelabs**: ✅
+1. **day-2a-agent-tools.ipynb** - Custom function tools, agent tools, code execution
+2. **day-2b-agent-tools-best-practices.ipynb** - MCP integration, long-running operations
+3. **day-2b-final-exercise-solution.ipynb** - Complete image generation agent with cost approval
+
+**🎨 Exercise Completed**: ✅
+**Image Generation Agent with Cost Approval**
+- Integrated MCP image generation server (Replicate API)
+- Auto-approves single image requests (≤1 image)
+- Pauses for human approval on bulk requests (>1 image)
+- Implements resumable workflows with state management
+- Demonstrates real-world compliance patterns for cost control
+
+**📊 Resources Created**:
+- Comprehensive README with whitepaper notes and practical guides
+- Best practices guide (5 categories with DO/DON'T examples)
+- Complete code examples for all tool types
+
+#### Key Takeaways
+
+1. **Tools Transform Agents**: Without tools, agents are isolated. With tools, they become executors that can interact with the real world
+2. **MCP Solves Integration Chaos**: One standard protocol eliminates hundreds of hours of custom API client development
+3. **Production Patterns Matter**: Structured returns, error handling, and approval workflows separate POCs from production systems
+4. **Pausable Workflows**: Human-in-the-loop patterns using `ToolContext`, `invocation_id`, and state management enable compliance checkpoints
 
 ---
 
@@ -270,7 +313,11 @@ pip install google-adk
   - Whitepaper notes extracted and documented
   - Both codelabs completed
   - Comprehensive README created
-- [ ] **Day 2**: Agent Tools & Interoperability with MCP
+- [x] **Day 2**: Agent Tools & Interoperability with MCP - ✅ **COMPLETED**
+  - Whitepaper notes on MCP architecture and benefits
+  - All 3 codelabs completed (tools, best practices, exercise solution)
+  - Image generation agent with cost approval workflow
+  - Best practices guide and comprehensive README created
 - [ ] **Day 3**: Context Engineering & Memory Management
 - [ ] **Day 4**: Agent Quality: Observability, Logging, Tracing & Evaluation
 - [ ] **Day 5**: Prototype to Production
