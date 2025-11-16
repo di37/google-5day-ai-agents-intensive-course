@@ -237,7 +237,7 @@ Find more at [modelcontextprotocol.io/examples](https://modelcontextprotocol.io/
    - Production-ready tool patterns
 
 3. **day-2b-final-exercise-solution.ipynb**
-   - Complete solution: Image generation agent with cost approval
+   - Complete solution: Image generation agent with bulk approval
    - Integrating MCP image generation server
    - Implementing bulk request approval workflow
    - Handling single vs. bulk generation requests

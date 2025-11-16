@@ -146,15 +146,14 @@ This intensive 5-day course combines **theoretical insights** with **practical a
 **💻 Codelabs**: ✅
 1. **day-2a-agent-tools.ipynb** - Custom function tools, agent tools, code execution
 2. **day-2b-agent-tools-best-practices.ipynb** - MCP integration, long-running operations
-3. **day-2b-final-exercise-solution.ipynb** - Complete image generation agent with cost approval
+3. **day-2b-final-exercise-solution.ipynb** - Complete image generation agent with bulk approval
 
 **🎨 Exercise Completed**: ✅
-**Image Generation Agent with Cost Approval**
+**Image Generation Agent with Bulk Approval**
 - Integrated MCP image generation server (Replicate API)
 - Auto-approves single image requests (≤1 image)
 - Pauses for human approval on bulk requests (>1 image)
 - Implements resumable workflows with state management
-- Demonstrates real-world compliance patterns for cost control
 
 **📊 Resources Created**:
 - Comprehensive README with whitepaper notes and practical guides
@@ -316,7 +315,7 @@ pip install google-adk
 - [x] **Day 2**: Agent Tools & Interoperability with MCP - ✅ **COMPLETED**
   - Whitepaper notes on MCP architecture and benefits
   - All 3 codelabs completed (tools, best practices, exercise solution)
-  - Image generation agent with cost approval workflow
+  - Image generation agent with bulk approval workflow
   - Best practices guide and comprehensive README created
 - [ ] **Day 3**: Context Engineering & Memory Management
 - [ ] **Day 4**: Agent Quality: Observability, Logging, Tracing & Evaluation
