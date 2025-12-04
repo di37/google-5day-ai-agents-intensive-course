@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 3: Context Engineering - Sessions & Memory 🧠</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Google-inspired color palette */
+        :root {
+            --google-blue: #4285f4;
+            --google-red: #ea4335;
+            --google-yellow: #fbbc04;
+            --google-green: #34a853;
+            --google-blue-light: #e8f0fe;
+            --google-red-light: #fce8e6;
+            --google-yellow-light: #fef7e0;
+            --google-green-light: #e6f4ea;
+        }
+
+        /* Using Google's Product Sans-inspired font */
+        body {
+            font-family: 'Google Sans', 'Product Sans', 'Roboto', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        /* Custom styles for the slide transitions */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 2rem;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+            visibility: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+            visibility: visible;
+        }
+
+        /* Custom scrollbar for slides */
+        .slide::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .slide::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .slide::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .slide::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Google-style cards */
+        .google-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 1px 3px 0 rgba(60,64,67,.3), 0 4px 8px 3px rgba(60,64,67,.15);
+            transition: all 0.3s ease;
+        }
+
+        .google-card:hover {
+            box-shadow: 0 2px 6px 0 rgba(60,64,67,.3), 0 8px 16px 6px rgba(60,64,67,.15);
+            transform: translateY(-2px);
+        }
+
+        /* Colorful badges */
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85em;
+            margin: 3px;
+            transition: transform 0.2s ease;
+        }
+
+        .badge:hover {
+            transform: scale(1.05);
+        }
+
+        .badge-blue { background: var(--google-blue-light); color: var(--google-blue); }
+        .badge-red { background: var(--google-red-light); color: var(--google-red); }
+        .badge-yellow { background: var(--google-yellow-light); color: #ea8600; }
+        .badge-green { background: var(--google-green-light); color: var(--google-green); }
+
+        /* Animated button styles */
+        .nav-button {
+            background: white;
+            color: var(--google-blue);
+            border: 2px solid var(--google-blue);
+            padding: 12px 32px;
+            border-radius: 24px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .nav-button:hover:not(:disabled) {
+            background: var(--google-blue);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(66,133,244,0.3);
+        }
+
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Quick navigation dots */
+        .slide-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            margin: 0 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .slide-dot.active {
+            background: white;
+            transform: scale(1.5);
+        }
+
+        .slide-dot:hover {
+            background: rgba(255,255,255,0.8);
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--google-blue), var(--google-green));
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 3px;
+        }
+
+        /* Emoji animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .floating-emoji {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Title styling with Google colors */
+        .title-word-1 { color: var(--google-blue); }
+        .title-word-2 { color: var(--google-red); }
+        .title-word-3 { color: var(--google-yellow); }
+        .title-word-4 { color: var(--google-green); }
+
+        /* Interactive highlight on hover */
+        .interactive-section {
+            transition: all 0.3s ease;
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .interactive-section:hover {
+            background: rgba(66,133,244,0.05);
+            transform: translateX(10px);
+        }
+
+        /* Slide counter with Google colors */
+        .slide-counter {
+            background: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            color: var(--google-blue);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Action buttons */
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-blue { background: var(--google-blue); color: white; }
+        .btn-red { background: var(--google-red); color: white; }
+        .btn-yellow { background: var(--google-yellow); color: #5f4700; }
+        .btn-green { background: var(--google-green); color: white; }
+
+        /* Flip card styles */
+        .flip-card {
+            perspective: 1000px;
+            height: 220px;
+            cursor: pointer;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 1px 3px 0 rgba(60,64,67,.3), 0 4px 8px 3px rgba(60,64,67,.15);
+        }
+
+        .flip-card-front {
+            background: white;
+        }
+
+        .flip-card-back {
+            background: var(--google-blue-light);
+            transform: rotateY(180deg);
+        }
+
+        /* Tab styles */
+        .tab-btn {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: #5f6368;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn:hover {
+            color: var(--google-blue);
+            background: var(--google-blue-light);
+        }
+
+        .tab-btn.active {
+            color: var(--google-blue);
+            border-bottom-color: var(--google-blue);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Compaction demo toggle */
+        .toggle-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #e0e0e0;
+            background: white;
+        }
+
+        .toggle-btn.active {
+            background: var(--google-blue);
+            color: white;
+            border-color: var(--google-blue);
+        }
+
+        .toggle-btn.active-green {
+            background: var(--google-green);
+            color: white;
+            border-color: var(--google-green);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-2">
+
+    <div class="w-full max-w-7xl px-2">
+        <!-- Progress Bar -->
+        <div class="progress-bar mb-4">
+            <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+        </div>
+
+        <!-- Slide Container -->
+        <div id="slide-container" class="w-full rounded-3xl shadow-2xl overflow-hidden relative bg-white" style="height: 85vh; min-height: 600px;">
+
+            <!-- Slide 1: Title Slide -->
+            <div class="slide active flex flex-col items-center justify-center text-center">
+                <div class="floating-emoji text-8xl mb-8">🧠</div>
+                <h1 class="text-6xl font-bold mb-4">
+                    <span class="title-word-1">Context</span> 
+                    <span class="title-word-2">Engineering</span>
+                </h1>
+                <p class="text-3xl text-gray-600 mb-6">Sessions & Memory</p>
+                <div class="google-card inline-block">
+                    <p class="text-gray-600">Based on the Google Whitepaper by</p>
+                    <p class="font-semibold text-gray-800 mt-1">Kimberly Milam & Antonio Gulli</p>
+                    <div class="mt-4">
+                        <span class="badge badge-blue">📚 Day 3</span>
+                        <span class="badge badge-green">Interactive Deck</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2: What is Context Engineering? -->
+            <div class="slide">
+                <h2 class="text-4xl font-bold text-gray-800 mb-6">🎯 What is Context Engineering?</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div class="google-card">
+                            <div class="flex items-start gap-4">
+                                <span class="text-3xl">⚠️</span>
+                                <div>
+                                    <h3 class="text-xl font-bold mb-2" style="color: var(--google-red)">The Problem</h3>
+                                    <p class="text-gray-700">LLMs are stateless. They don't remember you between API calls.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="google-card">
+                            <div class="flex items-start gap-4">
+                                <span class="text-3xl">✨</span>
+                                <div>
+                                    <h3 class="text-xl font-bold mb-2" style="color: var(--google-green)">The Solution</h3>
+                                    <p class="text-gray-700">We must rebuild the "world" (context) for the agent every single turn.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 rounded-lg" style="background: var(--google-blue-light); border-left: 4px solid var(--google-blue);">
+                            <p class="text-gray-700 italic">"Context Engineering is the mise en place for an agent—gathering all ingredients before cooking."</p>
+                        </div>
+                    </div>
+                    <div class="google-card">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">📦 The Context Payload</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-center gap-3">
+                                <span class="text-2xl">📝</span>
+                                <span class="text-gray-700">System Instructions (Persona)</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <span class="text-2xl">💬</span>
+                                <span class="text-gray-700">Conversation History</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <span class="text-2xl">🔍</span>
+                                <span class="text-gray-700">RAG / External Knowledge</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <span class="text-2xl">🧠</span>
+                                <strong style="color: var(--google-blue)">Memory</strong>
+                                <span class="text-gray-600">(User specific)</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3: The Core Distinction -->
+            <div class="slide">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4 text-center">🔄 The Core Distinction</h2>
+                <p class="text-gray-600 text-center mb-8">How do we manage time in an agent's life? Click the cards to learn more!</p>
+                
+                <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <!-- Session Flip Card -->
+                    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <span class="text-6xl mb-4">⚡</span>
+                                <h3 class="text-2xl font-bold text-gray-800">Session</h3>
+                                <p class="mt-3 text-sm text-gray-500">Click to reveal details</p>
+                            </div>
+                            <div class="flip-card-back">
+                                <p class="text-lg text-gray-700 leading-relaxed">Think of this as your <strong>WORKBENCH</strong>. It's messy, contains everything needed for the current task, and is temporary. It holds the immediate conversation history and working state.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Memory Flip Card -->
+                    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <span class="text-6xl mb-4">🗄️</span>
+                                <h3 class="text-2xl font-bold text-gray-800">Memory</h3>
+                                <p class="mt-3 text-sm text-gray-500">Click to reveal details</p>
+                            </div>
+                            <div class="flip-card-back" style="background: var(--google-green-light);">
+                                <p class="text-lg text-gray-700 leading-relaxed">Think of this as your <strong>FILING CABINET</strong>. It is organized, curated, and long-term. We file away only the important finalized documents (facts, preferences) for future reference.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 4: Sessions: The "Hot Path" -->
+            <div class="slide">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">⚡ Sessions: The "Hot Path"</h2>
+                <p class="text-xl text-gray-600 mb-6">A session encapsulates the immediate dialogue history.</p>
+                
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="google-card interactive-section">
+                        <div class="text-4xl mb-3">📋</div>
+                        <h3 class="text-xl font-bold mb-2" style="color: var(--google-blue)">Events</h3>
+                        <p class="text-gray-600">The raw chronological log: User messages, Model responses, Tool calls, and Tool outputs.</p>
+                    </div>
+                    <div class="google-card interactive-section">
+                        <div class="text-4xl mb-3">📦</div>
+                        <h3 class="text-xl font-bold mb-2" style="color: var(--google-green)">State</h3>
+                        <p class="text-gray-600">Structured "working memory" or scratchpad. Example: The items currently in a shopping cart.</p>
+                    </div>
+                    <div class="google-card interactive-section" style="background: var(--google-red-light);">
+                        <div class="text-4xl mb-3">⚠️</div>
+                        <h3 class="text-xl font-bold mb-2" style="color: var(--google-red)">The Challenge</h3>
+                        <p class="text-gray-700">Infinite history = Infinite cost & Latency. Context windows are limited. We need <strong>Compaction</strong>.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 5: Session Management: Compaction -->
+            <div class="slide flex flex-col justify-center">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4 text-center">🗜️ Session Management: Compaction</h2>
+                <p class="text-gray-600 text-center mb-6 max-w-2xl mx-auto">
+                    How do we keep a session running for hours without blowing the token budget?
+                    We summarize or truncate older turns.
+                </p>
+                
+                <div class="google-card max-w-2xl mx-auto w-full">
+                    <div class="flex gap-4 mb-4">
+                        <button id="fullBtn" class="toggle-btn active flex-1" onclick="showCompactionStage('full')">
+                            1. Full Session Log
+                        </button>
+                        <button id="summaryBtn" class="toggle-btn flex-1" onclick="showCompactionStage('summary')">
+                            2. After Compaction
+                        </button>
+                    </div>
+                    <div class="p-4 rounded-lg bg-gray-100 font-mono text-sm min-h-[100px]">
+                        <p id="compactionText" class="text-gray-700">User: Hi, I'm looking for a flight. Agent: Where to? User: Paris. Agent: When? User: Next Friday. Agent: Morning or Evening? User: Morning. Agent: Okay, I found flight AB123.</p>
+                    </div>
+                    <p id="compactionNote" class="mt-3 text-sm text-gray-500 text-center">
+                        High token cost. Full history sent to LLM.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Slide 6: Memory vs. RAG -->
+            <div class="slide">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4 text-center">🔍 Memory vs. RAG</h2>
+                <p class="text-gray-600 text-center mb-6 max-w-2xl mx-auto">
+                    They are often confused, but they serve opposite roles. RAG is about the <em>world</em>. Memory is about the <em>user</em>.
+                </p>
+                
+                <div class="google-card max-w-4xl mx-auto">
+                    <!-- Tabs -->
+                    <div class="flex border-b border-gray-200 mb-4">
+                        <button class="tab-btn active flex-1 flex items-center justify-center gap-2" onclick="showTab(0)">
+                            <span class="text-xl">🔍</span>
+                            RAG Engine
+                        </button>
+                        <button class="tab-btn flex-1 flex items-center justify-center gap-2" onclick="showTab(1)">
+                            <span class="text-xl">👤</span>
+                            Memory Manager
+                        </button>
+                    </div>
+                    
+                    <!-- Tab Contents -->
+                    <div class="tab-content active p-4" id="tab-0">
+                        <div class="p-6 rounded-lg" style="background: var(--google-blue-light);">
+                            <h4 class="text-2xl font-bold mb-3" style="color: var(--google-blue)">The Research Librarian 📚</h4>
+                            <p class="text-lg text-gray-700 leading-relaxed">RAG connects the agent to a static, authoritative knowledge base (Wikis, PDFs, Databases). It makes the agent an expert on <strong>FACTS</strong>. It is shared across all users.</p>
+                        </div>
+                    </div>
+                    <div class="tab-content p-4" id="tab-1">
+                        <div class="p-6 rounded-lg" style="background: var(--google-green-light);">
+                            <h4 class="text-2xl font-bold mb-3" style="color: var(--google-green)">The Personal Assistant 🎯</h4>
+                            <p class="text-lg text-gray-700 leading-relaxed">Memory connects the agent to a dynamic, evolving understanding of the specific <strong>USER</strong>. It stores preferences, past goals, and personal context. It is strictly isolated per user.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 7: Types of Memory -->
+            <div class="slide">
+                <h2 class="text-4xl font-bold text-gray-800 mb-6">🧩 Types of Memory</h2>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="google-card" style="border-top: 4px solid var(--google-blue);">
+                        <h3 class="text-2xl font-bold mb-3" style="color: var(--google-blue)">Declarative Memory</h3>
+                        <span class="badge badge-blue mb-4">"Knowing What"</span>
+                        <ul class="space-y-3 text-gray-700 mt-4">
+                            <li>• Facts, Figures, Events.</li>
+                            <li>• <strong>Semantic:</strong> General world knowledge.</li>
+                            <li>• <strong>Episodic:</strong> Specific user details (e.g., "User is allergic to peanuts").</li>
+                        </ul>
+                    </div>
+
+                    <div class="google-card" style="border-top: 4px solid var(--google-green);">
+                        <h3 class="text-2xl font-bold mb-3" style="color: var(--google-green)">Procedural Memory</h3>
+                        <span class="badge badge-green mb-4">"Knowing How"</span>
+                        <ul class="space-y-3 text-gray-700 mt-4">
+                            <li>• Skills and Workflows.</li>
+                            <li>• Learned through experience (e.g., "How to book a complex flight itinerary").</li>
+                            <li>• Allows agents to self-improve over time.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 8: The Memory Lifecycle -->
+            <div class="slide">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4 text-center">🔄 The Memory Lifecycle</h2>
+                <p class="text-gray-600 text-center mb-6">From raw conversation to persistent wisdom.</p>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="google-card text-center interactive-section">
+                        <div class="text-5xl mb-3">📥</div>
+                        <h4 class="text-lg font-bold text-gray-800 mb-2">Ingestion</h4>
+                        <p class="text-sm text-gray-600">Raw conversation logs are sent to the memory manager.</p>
+                    </div>
+                    <div class="google-card text-center interactive-section">
+                        <div class="text-5xl mb-3">🔬</div>
+                        <h4 class="text-lg font-bold text-gray-800 mb-2">Extraction</h4>
+                        <p class="text-sm text-gray-600">LLM identifies 'meaningful' info vs. noise.</p>
+                    </div>
+                    <div class="google-card text-center interactive-section">
+                        <div class="text-5xl mb-3">🔄</div>
+                        <h4 class="text-lg font-bold text-gray-800 mb-2">Consolidation</h4>
+                        <p class="text-sm text-gray-600">New info is merged with old. Conflicts resolved.</p>
+                    </div>
+                    <div class="google-card text-center interactive-section">
+                        <div class="text-5xl mb-3">💾</div>
+                        <h4 class="text-lg font-bold text-gray-800 mb-2">Storage</h4>
+                        <p class="text-sm text-gray-600">Saved to Vector DB (Semantic) or Graph (Relational).</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 9: Deep Dive: Memory Generation -->
+            <div class="slide">
+                <h2 class="text-4xl font-bold text-gray-800 mb-6">🔬 Deep Dive: Memory Generation</h2>
+                
+                <div class="space-y-4">
+                    <div class="google-card" style="border-left: 4px solid var(--google-yellow);">
+                        <h3 class="text-xl font-bold mb-3" style="color: #ea8600">Step 1: Extraction (The Filter)</h3>
+                        <p class="text-gray-700">
+                            An LLM analyzes the session. It ignores pleasantries ("Hello", "Thanks") and extracts <strong>Entities</strong>, <strong>Intent</strong>, and <strong>Facts</strong> based on a schema or specific prompt instructions.
+                        </p>
+                    </div>
+
+                    <div class="google-card" style="border-left: 4px solid var(--google-green);">
+                        <h3 class="text-xl font-bold mb-3" style="color: var(--google-green)">Step 2: Consolidation (The Gardener)</h3>
+                        <p class="text-gray-700 mb-4">
+                            This is the "Smart" part. The system doesn't just append. It asks:
+                        </p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="p-4 rounded-lg text-center" style="background: var(--google-green-light);">
+                                <span class="font-bold block mb-1" style="color: var(--google-green)">NEW?</span>
+                                <span class="text-sm text-gray-600">Create new memory.</span>
+                            </div>
+                            <div class="p-4 rounded-lg text-center" style="background: var(--google-yellow-light);">
+                                <span class="font-bold block mb-1" style="color: #ea8600">UPDATE?</span>
+                                <span class="text-sm text-gray-600">Merge with existing fact.</span>
+                            </div>
+                            <div class="p-4 rounded-lg text-center" style="background: var(--google-red-light);">
+                                <span class="font-bold block mb-1" style="color: var(--google-red)">CONFLICT?</span>
+                                <span class="text-sm text-gray-600">Overwrite if source is trusted.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 10: Memory Provenance & Trust -->
+            <div class="slide">
+                <h2 class="text-4xl font-bold text-gray-800 mb-6">🛡️ Memory Provenance & Trust</h2>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div class="google-card">
+                            <p class="text-xl text-gray-700 font-semibold">
+                                "Garbage in, Confident Garbage out."
+                            </p>
+                            <p class="text-gray-600 mt-2">
+                                We must track <strong>Lineage</strong> (where did this memory come from?) to trust it.
+                            </p>
+                        </div>
+                        <div class="p-4 rounded-lg" style="background: var(--google-red-light); border-left: 4px solid var(--google-red);">
+                            <h4 class="font-bold mb-2" style="color: var(--google-red)">⚡ Conflict Resolution</h4>
+                            <p class="text-sm text-gray-700">
+                                If User says "I'm vegan" today, but said "I love steak" last year, the system uses <strong>Recency</strong> and <strong>Source Trust</strong> to overwrite the old memory.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="google-card">
+                        <h4 class="text-xl font-bold text-gray-800 mb-4">🏆 Hierarchy of Trust</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 p-3 rounded-lg" style="background: var(--google-green-light);">
+                                <span class="text-2xl">🛡️</span>
+                                <span style="color: var(--google-green);" class="font-semibold">1. Explicit User Settings (Profile)</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 rounded-lg" style="background: var(--google-blue-light);">
+                                <span class="text-2xl">👤</span>
+                                <span style="color: var(--google-blue);" class="font-semibold">2. Explicit User Statement ("Remember this")</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 rounded-lg" style="background: var(--google-yellow-light);">
+                                <span class="text-2xl">🧠</span>
+                                <span style="color: #ea8600;" class="font-semibold">3. Implicitly Inferred from Chat</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 11: Retrieval: Finding the Right Memory -->
+            <div class="slide">
+                <h2 class="text-4xl font-bold text-gray-800 text-center mb-4">🔎 Retrieval: Finding the Right Memory</h2>
+                <p class="text-center text-gray-600 mb-6">
+                    We don't just dump all memories into the context. We score them.
+                </p>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="google-card" style="border-top: 4px solid var(--google-blue);">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Relevance</h3>
+                        <span class="badge badge-blue">Semantic Similarity</span>
+                        <p class="text-gray-600 mt-3">"Does this memory relate to the current topic?" (Vector Search)</p>
+                    </div>
+                    <div class="google-card" style="border-top: 4px solid var(--google-yellow);">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Recency</h3>
+                        <span class="badge badge-yellow">Time Decay</span>
+                        <p class="text-gray-600 mt-3">"Is this info still fresh? Or from 2 years ago?"</p>
+                    </div>
+                    <div class="google-card" style="border-top: 4px solid var(--google-green);">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Importance</h3>
+                        <span class="badge badge-green">Significance Score</span>
+                        <p class="text-gray-600 mt-3">"Is this a core fact (wedding anniversary) or trivial (weather)?"</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 12: Production Architecture -->
+            <div class="slide">
+                <h2 class="text-4xl font-bold text-gray-800 mb-6">🏗️ Production Architecture</h2>
+                <div class="google-card max-w-3xl mx-auto">
+                    <div class="space-y-6">
+                        <div class="flex items-start gap-6">
+                            <div class="w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0" style="background: var(--google-red-light);">
+                                <span class="text-3xl">⚡</span>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">The Latency Problem</h3>
+                                <p class="text-gray-600">Generating memories (Extraction + Consolidation) is SLOW. It involves complex LLM chains.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-center">
+                            <div class="w-1 h-10 bg-gray-300 rounded"></div>
+                        </div>
+
+                        <div class="flex items-start gap-6">
+                            <div class="w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0" style="background: var(--google-green-light);">
+                                <span class="text-3xl">🖥️</span>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">The Async Solution</h3>
+                                <p class="text-gray-600">
+                                    Decouple memory generation. The agent responds to the user <em>immediately</em>. 
+                                    Then, in the <strong>background</strong>, the memory service processes the log and updates the database.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 13: Security & Privacy -->
+            <div class="slide">
+                <h2 class="text-4xl font-bold text-gray-800 mb-6">🔒 Security & Privacy</h2>
+                <div class="space-y-4 max-w-4xl mx-auto">
+                    <div class="google-card interactive-section flex items-start gap-4">
+                        <div class="text-4xl">🛡️</div>
+                        <div class="flex-1">
+                            <h4 class="text-xl font-bold mb-1" style="color: var(--google-blue)">Strict Isolation</h4>
+                            <p class="text-gray-600">Memories must be scoped to a single User ID. ACLs prevent cross-user leakage.</p>
+                        </div>
+                    </div>
+                    <div class="google-card interactive-section flex items-start gap-4">
+                        <div class="text-4xl">🔍</div>
+                        <div class="flex-1">
+                            <h4 class="text-xl font-bold mb-1" style="color: var(--google-green)">PII Redaction</h4>
+                            <p class="text-gray-600">Personally Identifiable Information should be detected and redacted <em>before</em> storage.</p>
+                        </div>
+                    </div>
+                    <div class="google-card interactive-section flex items-start gap-4">
+                        <div class="text-4xl">⚠️</div>
+                        <div class="flex-1">
+                            <h4 class="text-xl font-bold mb-1" style="color: var(--google-red)">Memory Poisoning Defense</h4>
+                            <p class="text-gray-600">Malicious users might try to inject false facts ("I am the admin"). Validation layers are required.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 14: Key Takeaways -->
+            <div class="slide">
+                <h2 class="text-4xl font-bold text-gray-800 mb-8 text-center">🎯 Key Takeaways</h2>
+                <div class="max-w-4xl mx-auto space-y-4">
+                    <div class="google-card interactive-section">
+                        <div class="flex items-start gap-4">
+                            <div class="text-5xl">1️⃣</div>
+                            <div class="flex-1">
+                                <h3 class="text-2xl font-bold mb-2" style="color: var(--google-blue)">Sessions = The "Now"</h3>
+                                <p class="text-lg text-gray-700">Manage immediate dialogue history. Optimized for speed & continuity. Use compaction to manage tokens.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="google-card interactive-section">
+                        <div class="flex items-start gap-4">
+                            <div class="text-5xl">2️⃣</div>
+                            <div class="flex-1">
+                                <h3 class="text-2xl font-bold mb-2" style="color: var(--google-green)">Memory = The "History"</h3>
+                                <p class="text-lg text-gray-700">Long-term storage of user preferences and facts. Optimized for personalization & growth.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="google-card interactive-section">
+                        <div class="flex items-start gap-4">
+                            <div class="text-5xl">3️⃣</div>
+                            <div class="flex-1">
+                                <h3 class="text-2xl font-bold mb-2" style="color: var(--google-red)">Security is Critical</h3>
+                                <p class="text-lg text-gray-700">Strict isolation, PII redaction, and memory poisoning defense are essential for production.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-8">
+                        <div class="text-7xl mb-4 floating-emoji">🎉</div>
+                        <p class="text-3xl font-bold" style="color: var(--google-blue)">Thank You! 🙏</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex justify-between items-center mt-3 px-2">
+            <button id="prevBtn" class="nav-button">
+                ← Previous
+            </button>
+            
+            <!-- Slide dots navigation -->
+            <div class="flex items-center gap-2" id="slideDots"></div>
+            
+            <div class="slide-counter">
+                <span id="slide-counter">1 / 14</span>
+            </div>
+            
+            <button id="nextBtn" class="nav-button">
+                Next →
+            </button>
+        </div>
+
+        <!-- Quick Action Buttons -->
+        <div class="flex justify-center gap-4 mt-3">
+            <button onclick="location.reload()" class="action-btn btn-blue">
+                🔄 Restart Presentation
+            </button>
+            <button onclick="window.print()" class="action-btn btn-green">
+                🖨️ Print Slides
+            </button>
+            <button id="fullscreenBtn" class="action-btn btn-yellow">
+                🖥️ Fullscreen Mode
+            </button>
+            <button id="themeBtn" class="action-btn btn-red">
+                🎨 Toggle Theme
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Wait for the DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Select all slide elements
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const counter = document.getElementById('slide-counter');
+            const progressFill = document.getElementById('progressFill');
+            const slideDotsContainer = document.getElementById('slideDots');
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            const themeBtn = document.getElementById('themeBtn');
+
+            let currentSlide = 0;
+            const totalSlides = slides.length;
+            
+            // Create slide navigation dots
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'slide-dot';
+                if (i === 0) dot.classList.add('active');
+                dot.addEventListener('click', () => {
+                    currentSlide = i;
+                    showSlide(currentSlide);
+                });
+                slideDotsContainer.appendChild(dot);
+            }
+
+            const slideDots = document.querySelectorAll('.slide-dot');
+                
+            /**
+             * Function to display a specific slide
+             * @param {number} index - The index of the slide to show
+             */
+            function showSlide(index) {
+                // Remove 'active' class from all slides and dots
+                slides.forEach((slide) => slide.classList.remove('active'));
+                slideDots.forEach((dot) => dot.classList.remove('active'));
+
+                // Add 'active' class to the target slide and dot
+                if (slides[index]) {
+                    slides[index].classList.add('active');
+                    slideDots[index].classList.add('active');
+                }
+
+                // Update the slide counter text
+                counter.textContent = `${index + 1} / ${totalSlides}`;
+
+                // Update progress bar
+                const progress = ((index + 1) / totalSlides) * 100;
+                progressFill.style.width = `${progress}%`;
+
+                // Update the state of the navigation buttons
+                prevBtn.disabled = (index === 0);
+                nextBtn.disabled = (index === totalSlides - 1);
+            }
+
+            // Navigation Event Listeners
+            nextBtn.addEventListener('click', () => {
+                if (currentSlide < totalSlides - 1) {
+                    currentSlide++;
+                    showSlide(currentSlide);
+                }
+            });
+
+            prevBtn.addEventListener('click', () => {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    showSlide(currentSlide);
+                }
+            });
+
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' && currentSlide < totalSlides - 1) {
+                    currentSlide++;
+                    showSlide(currentSlide);
+                } else if (e.key === 'ArrowLeft' && currentSlide > 0) {
+                    currentSlide--;
+                    showSlide(currentSlide);
+                }
+            });
+
+            // Fullscreen functionality
+            fullscreenBtn.addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                    fullscreenBtn.innerHTML = '🪟 Exit Fullscreen';
+                } else {
+                    document.exitFullscreen();
+                    fullscreenBtn.innerHTML = '🖥️ Fullscreen Mode';
+                }
+            });
+
+            // Theme toggle (dark mode simulation)
+            let isDarkTheme = false;
+            themeBtn.addEventListener('click', () => {
+                isDarkTheme = !isDarkTheme;
+                if (isDarkTheme) {
+                    document.body.style.background = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)';
+                    themeBtn.innerHTML = '☀️ Light Theme';
+                } else {
+                    document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                    themeBtn.innerHTML = '🎨 Toggle Theme';
+                }
+            });
+
+            // Show the first slide on initial load
+            showSlide(currentSlide);
+        });
+
+        // Compaction Demo functionality
+        function showCompactionStage(stage) {
+            const fullBtn = document.getElementById('fullBtn');
+            const summaryBtn = document.getElementById('summaryBtn');
+            const compactionText = document.getElementById('compactionText');
+            const compactionNote = document.getElementById('compactionNote');
+
+            if (stage === 'full') {
+                fullBtn.className = 'toggle-btn active flex-1';
+                summaryBtn.className = 'toggle-btn flex-1';
+                compactionText.textContent = "User: Hi, I'm looking for a flight. Agent: Where to? User: Paris. Agent: When? User: Next Friday. Agent: Morning or Evening? User: Morning. Agent: Okay, I found flight AB123.";
+                compactionText.className = 'text-gray-700';
+                compactionNote.textContent = 'High token cost. Full history sent to LLM.';
+            } else {
+                fullBtn.className = 'toggle-btn flex-1';
+                summaryBtn.className = 'toggle-btn active-green flex-1';
+                compactionText.textContent = "User wants a flight to Paris next Friday morning. Agent proposed flight AB123.";
+                compactionText.style.color = 'var(--google-green)';
+                compactionText.style.fontWeight = '600';
+                compactionNote.textContent = 'Low token cost. Meaning preserved, "fluff" removed.';
+            }
+        }
+
+        // Tab functionality
+        function showTab(tabIndex) {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabBtns.forEach((btn, i) => {
+                btn.classList.toggle('active', i === tabIndex);
+            });
+
+            tabContents.forEach((content, i) => {
+                content.classList.toggle('active', i === tabIndex);
+            });
+        }
+    </script>
+</body>
+</html>

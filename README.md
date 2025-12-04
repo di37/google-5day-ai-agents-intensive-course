@@ -17,7 +17,7 @@ A collaborative program by **Google** and **Kaggle** designed to equip participa
 - [Progress Tracker](#-progress-tracker)
   - [✅ Day 1: Introduction to Agents & Agentic Architectures](#-day-1-introduction-to-agents--agentic-architectures-completed)
   - [✅ Day 2: Agent Tools & Interoperability with MCP](#-day-2-agent-tools--interoperability-with-mcp-completed)
-  - [⬜ Day 3: Context Engineering & Memory Management](#-day-3-context-engineering--memory-management-pending)
+  - [✅ Day 3: Context Engineering & Memory Management](#-day-3-context-engineering--memory-management-completed)
   - [⬜ Day 4: Agent Quality: Observability, Logging, Tracing & Evaluation](#-day-4-agent-quality-observability-logging-tracing--evaluation-pending)
   - [⬜ Day 5: Prototype to Production](#-day-5-prototype-to-production-pending)
 - [Resources](#-resources)
@@ -48,7 +48,7 @@ This intensive 5-day course combines **theoretical insights** with **practical a
 |-----|-------|--------|
 | **Day 1** | Introduction to Agents & Agentic Architectures | ✅ Completed |
 | **Day 2** | Agent Tools & Interoperability with MCP | ✅ Completed |
-| **Day 3** | Context Engineering & Memory Management | ⬜ Pending |
+| **Day 3** | Context Engineering & Memory Management | ✅ Completed |
 | **Day 4** | Agent Quality: Observability, Logging, Tracing & Evaluation | ⬜ Pending |
 | **Day 5** | Prototype to Production | ⬜ Pending |
 
@@ -146,14 +146,15 @@ This intensive 5-day course combines **theoretical insights** with **practical a
 **💻 Codelabs**: ✅
 1. **day-2a-agent-tools.ipynb** - Custom function tools, agent tools, code execution
 2. **day-2b-agent-tools-best-practices.ipynb** - MCP integration, long-running operations
-3. **day-2b-final-exercise-solution.ipynb** - Complete image generation agent with bulk approval
+3. **day-2b-final-exercise-solution.ipynb** - Complete image generation agent with cost approval
 
 **🎨 Exercise Completed**: ✅
-**Image Generation Agent with Bulk Approval**
+**Image Generation Agent with Cost Approval**
 - Integrated MCP image generation server (Replicate API)
 - Auto-approves single image requests (≤1 image)
 - Pauses for human approval on bulk requests (>1 image)
 - Implements resumable workflows with state management
+- Demonstrates real-world compliance patterns for cost control
 
 **📊 Resources Created**:
 - Comprehensive README with whitepaper notes and practical guides
@@ -169,24 +170,60 @@ This intensive 5-day course combines **theoretical insights** with **practical a
 
 ---
 
-### ⬜ Day 3: Context Engineering & Memory Management (Pending)
+### ✅ Day 3: Context Engineering & Memory Management (Completed)
 
 **📁 Folder**: [`day_03/`](./day_03/)
 
-#### Topics to Cover
+#### What I Learned
 
-- Context engineering principles
-- Short-term vs. long-term memory
-- Memory management strategies
-- Retrieval-Augmented Generation (RAG)
-- Session state management
-- Context window optimization
+**Theoretical Foundations:**
+- 🎯 Context Engineering principles - "mise en place" for agents
+- ⚡ Sessions: The "Hot Path" - temporary conversation state
+- 🧠 Memory: Long-term user knowledge and preferences
+- 🔄 The critical distinction between Sessions and Memory (Workbench vs Filing Cabinet)
+- 🔍 Memory vs RAG - understanding when to use each
+- 📚 Types of Memory: Declarative (facts) and Procedural (workflows)
+- 🔄 The Memory Lifecycle: Ingestion → Extraction → Consolidation → Storage
+- 🛡️ Memory Provenance & Trust hierarchy
+- 🔎 Smart retrieval: Scoring by Relevance, Recency, and Importance
+- 🏗️ Production architecture: Async memory generation for zero latency
+- 🔒 Security: User isolation, PII redaction, memory poisoning defense
 
-#### Assignments
+**Practical Skills:**
+- Built agents with conversation history and session state
+- Implemented session compaction strategies (summarization vs truncation)
+- Created memory systems for long-term user preferences
+- Developed memory extraction and consolidation logic
+- Implemented conflict resolution with trust hierarchy
+- Built retrieval systems with multi-dimensional scoring
+- Designed async memory generation workflows
+- Applied security best practices for memory systems
 
-**📖 Whitepaper**: Context Engineering & Memory
-**🎧 Podcast**: Unit 3 Summary
-**💻 Codelabs**: TBD
+#### Materials Completed
+
+**📖 Whitepaper**: Context Engineering - Sessions & Memory ✅
+- Comprehensive notes on session management vs memory
+- Key concepts: Context payload, compaction, memory lifecycle
+- Production patterns: Async generation, security, retrieval
+
+**💻 Codelabs**: ✅
+1. **day-3a-agent-sessions.ipynb** - Session management and conversation history
+2. **day-3b-agent-memory.ipynb** - Building memory systems with storage and retrieval
+
+**🎨 Resources Created**:
+- Comprehensive README with whitepaper notes
+- Interactive HTML slides with Google-inspired theme
+- Complete lifecycle diagrams and examples
+- Production architecture patterns
+
+#### Key Takeaways
+
+1. **Context is Everything**: LLMs are stateless—context engineering rebuilds the world every turn
+2. **Two Time Scales**: Sessions (temporary, fast) vs Memory (permanent, curated)
+3. **Memory ≠ RAG**: RAG is about the world (shared), Memory is about the user (private)
+4. **Lifecycle Matters**: Proper extraction, consolidation, and retrieval separate toy demos from production systems
+5. **Async is Essential**: Background memory generation enables zero user-perceived latency
+6. **Security First**: User isolation, PII redaction, and poisoning defense are non-negotiable
 
 ---
 
@@ -257,11 +294,11 @@ This intensive 5-day course combines **theoretical insights** with **practical a
 ## 🎯 Learning Path
 
 ```
-Day 1: Foundations → Build First Agent → Multi-Agent Systems
+Day 1: Foundations → Build First Agent → Multi-Agent Systems ✅
                                 ↓
-Day 2: Custom Tools → MCP Integration → Advanced Functions
+Day 2: Custom Tools → MCP Integration → Advanced Functions ✅
                                 ↓
-Day 3: Context Engineering → Memory Management → RAG
+Day 3: Context Engineering → Memory Management → RAG ✅
                                 ↓
 Day 4: Observability → Logging/Tracing → Quality Evaluation
                                 ↓
@@ -315,9 +352,13 @@ pip install google-adk
 - [x] **Day 2**: Agent Tools & Interoperability with MCP - ✅ **COMPLETED**
   - Whitepaper notes on MCP architecture and benefits
   - All 3 codelabs completed (tools, best practices, exercise solution)
-  - Image generation agent with bulk approval workflow
+  - Image generation agent with cost approval workflow
   - Best practices guide and comprehensive README created
-- [ ] **Day 3**: Context Engineering & Memory Management
+- [x] **Day 3**: Context Engineering & Memory Management - ✅ **COMPLETED**
+  - Whitepaper notes on sessions vs memory, lifecycle, and production patterns
+  - Both codelabs completed (session management, memory systems)
+  - Interactive HTML slides with Google theme
+  - Comprehensive README with security and retrieval patterns
 - [ ] **Day 4**: Agent Quality: Observability, Logging, Tracing & Evaluation
 - [ ] **Day 5**: Prototype to Production
 - [ ] **Capstone Project**: Build Custom AI Agent
@@ -344,5 +385,5 @@ Personal notes and code implementations: For educational use only
 
 **Course Program**: Kaggle 5-Day AI Agents Intensive Course  
 **Organized By**: Google & Kaggle  
-**Last Updated**: November 2025
+**Last Updated**: December 2025
 
